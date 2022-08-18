@@ -1,0 +1,9 @@
+[user]
+
+    [user.player_x]
+    symbol = "X"
+    color = "blue"
+
+    [user.player_o]
+    symbol = "O"
+    color = "green"
