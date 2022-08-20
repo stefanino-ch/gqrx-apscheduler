@@ -1,2 +1,4 @@
 # All of PyCharm
 .idea
+
+__pycache__
