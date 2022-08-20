@@ -1,0 +1,88 @@
+# gqrx.toml
+
+# Valid date time formats
+# offset_date-time     = 2021-01-12 01:23:45+01:00
+# offset_date-time_utc = 2021-01-12 00:23:45Z
+# local_date-time      = 2021-01-12 01:23:45
+
+# date
+# ----
+# run_date (datetime|str) – the date/time to run the job at
+# timezone (datetime.tzinfo|str) – time zone for run_date if it doesn’t have one already
+
+# interval
+# --------
+# weeks (int) – number of weeks to wait
+# days (int) – number of days to wait
+# hours (int) – number of hours to wait
+# minutes (int) – number of minutes to wait
+# seconds (int) – number of seconds to wait
+# start_date (datetime|str) – starting point for the interval calculation
+# end_date (datetime|str) – latest possible date/time to trigger on
+# timezone (datetime.tzinfo|str) – time zone to use for the date/time calculations
+# jitter (int|None) – delay the job execution by jitter seconds at most
+
+# cron
+# ----
+# https://crontab.guru/
+#
+# year (int|str) – 4-digit year
+# month (int|str) – month (1-12)
+# day (int|str) – day of month (1-31)
+# week (int|str) – ISO week (1-53)
+# day_of_week (int|str) – number or name of weekday (0-6 or mon,tue,wed,thu,fri,sat,sun)
+# hour (int|str) – hour (0-23)
+# minute (int|str) – minute (0-59)
+# second (int|str) – second (0-59)
+# start_date (datetime|str) – earliest possible date/time to trigger on (inclusive)
+# end_date (datetime|str) – latest possible date/time to trigger on (inclusive)
+# timezone (datetime.tzinfo|str) – time zone to use for the date/time calculations (defaults to scheduler timezone)
+# jitter (int|None) – delay the job execution by jitter seconds at most
+
+[connection-settings]
+    hostname = "localhost"
+    port = 7356
+
+[initial-setup]
+    commands=["M OFF", "U DSP 0"]
+
+#[[task]]
+#    execution= "all" | "one_by_one"
+#    commands=["cmd_1", "cmd_2", "cmd_x"]
+#    sched_type= "date" "interval" "cron"
+
+#[[task]]
+#    execution="all"
+#    commands=["U DSP 1"]
+#    sched_type= "date"
+#    run_date= 2022-08-20 17:02:00
+
+#[[task]]
+#    execution="one_by_one"
+#    commands=["U DSP 0", "U DSP 1"]
+#    sched_type= "interval"
+#    start_date= 2022-08-20 17:03:00
+#    end_date= 2022-08-20 17:04:00
+#    seconds=10
+
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour= 17
+    minute= 55
+
+[[task]]
+    execution="one_by_one"
+    commands=["F 90000000", "F 100000000"]
+    sched_type= "cron"
+#    hour=
+#    minute=
+    second= "*/10"
+
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0", "U DSP 0"]
+    sched_type= "cron"
+    hour= 17
+    minute= 56
