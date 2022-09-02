@@ -1,3 +1,4 @@
+import sys
 import telnetlib
 
 from datetime import datetime
@@ -15,7 +16,7 @@ class Communicator:
             if not self.con:
                 self.con = telnetlib.Telnet(hostname, port)
         except Exception as err:
-            raise(err)
+            raise err
 
     def __send(self, cmd):
         self.con.write(f'{cmd}\n'.encode('ascii'))
@@ -27,7 +28,7 @@ class Communicator:
 
         now = datetime.now()
         dtstring = now.strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{dtstring} {cmd} {resp}')
+        sys.stdout.write(f'{dtstring} {cmd} {resp}')
 
         if resp == 'RPRT 0':
             return True

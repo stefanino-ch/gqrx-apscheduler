@@ -1,7 +1,9 @@
+import sys
+
 from communicator import Communicator
 
 
-class Task():
+class Task:
     exec_vals = ["all",
                  "one_by_one"]
 
@@ -66,20 +68,20 @@ class Task():
         self.second = None
 
     def get_param_dict(self):
-        self.param_dict = {}
+        param_dict = {}
         if self.cmd_sched is None:
-            return self.param_dict
+            return param_dict
         else:
             for prop in self.props_list[self.cmd_sched]:
                 if getattr(self, prop) is not None:
-                    self.param_dict[prop] = getattr(self, prop)
-            return self.param_dict
+                    param_dict[prop] = getattr(self, prop)
+            return param_dict
 
     def run_cmd(self, hostname, port):
         try:
             comm = Communicator(hostname, port)
         except Exception as err:
-            print(f'Problems during connection setup: {err}')
+            sys.stderr.write(f'Problems during connection setup: {err}')
             exit(1)
 
         if self.cmd_exec == Task.exec_vals.index('one_by_one'):
