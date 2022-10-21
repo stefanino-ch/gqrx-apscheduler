@@ -1,0 +1,28 @@
+# gqrx.toml
+
+[connection-settings]
+    hostname = "localhost"
+    port = 7356
+
+[initial-setup]
+    commands=["M OFF", "U DSP 0", "F 140000"]
+
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour= 18
+    minute= 46
+
+[[task]]
+    execution="all"
+    commands=["U DSP 0", "U IQRECORD 0"]
+    sched_type= "cron"
+    hour= 18
+    minute= 47
+
+[[task]]
+    execution="one_by_one"
+    commands=["F 50000000", "F 100000000"]
+    sched_type= "cron"
+    second= "*/10"

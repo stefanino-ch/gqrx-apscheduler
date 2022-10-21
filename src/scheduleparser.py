@@ -1,3 +1,8 @@
+"""
+:Author: Stefan Feuz
+:License: General Public License GNU GPL 3.0
+"""
+
 try:
     import tomllib
 except ModuleNotFoundError:
@@ -7,23 +12,44 @@ from task import Task
 
 
 class SchedParseExc(Exception):
+    """
+    Exception class for schedule parser
+    """
     def __init__(self, message):
+        """
+        Class initialization
+        """
         self.message = message
 
         super().__init__(message)
 
     def __str__(self):
+        """
+        :return: Exception text as string
+        """
         return self.message
 
 
 class ScheduleParser:
 
-    def __init__(self, file_path_name):
-        self.filename = file_path_name
+    def __init__(self, path_file_name):
+        """
+        Class initialization
+        """
+        self.setup_cmd = None
+        self.new_task = None
+        self.port = None
+        self.hostname = None
+        self.path_file_name = path_file_name
+        self.task_list = []
 
     def __read_file(self):
+        """
+        Reads the tomlib file containing the schedule to be executed.
+        :return: Content of the schedule file as tomlib structure
+        """
         try:
-            with open(self.filename, mode="rb") as fp:
+            with open(self.path_file_name, mode="rb") as fp:
                 schedule = tomllib.load(fp)
                 fp.close()
                 return schedule
@@ -31,48 +57,59 @@ class ScheduleParser:
             raise err
 
     def get_connection_settings(self):
+        """
+        Extracts the connection setup parameters from the schedule file.
+        :return: hostname and port number of the gqrx instance to connect
+        """
         try:
             schedule = self.__read_file()
-            hostname = schedule["connection-settings"]["hostname"]
-            port = schedule["connection-settings"]["port"]
-            return hostname, port
+            self.hostname = schedule["connection-settings"]["hostname"]
+            self.port = schedule["connection-settings"]["port"]
+            return self.hostname, self.port
         except (OSError, KeyError) as err:
             raise err
 
     def get_setup_cmd(self):
+        """
+        Extracts the initial gqrx setup commands to be executed once the
+        connection is set up
+        :return: List containing all setup commands
+        """
         try:
             schedule = self.__read_file()
-            setup_cmd = schedule["initial-setup"]["commands"]
-            return setup_cmd
+            self.setup_cmd = schedule["initial-setup"]["commands"]
+            return self.setup_cmd
         except (OSError, KeyError) as err:
             raise err
 
     def get_task_list(self):
-        task_list = []
+        """
+        Extracts all scheduler tasks from the schedule file.
+        :return: List containing instances of task representing a single task
+        """
         try:
             schedule = self.__read_file()
             tlist = schedule["task"]
             for task in tlist:
-                new_task = Task()
-                task_list.append(new_task)
+                self.new_task = Task()
+                self.task_list.append(self.new_task)
 
                 # loop through and build the list based on task class
                 for key, value in task.items():
-
                     if key == "execution":
                         if value in Task.exec_vals:
-                            new_task.cmd_exec \
+                            self.new_task.cmd_exec \
                                 = Task.exec_vals.index(value)
                         else:
                             raise(SchedParseExc
                                   (f'Unknown execution type found: {value}'))
 
                     elif key == 'commands':
-                        new_task.cmd_list = value
+                        self.new_task.cmd_list = value
 
                     elif key == "sched_type":
                         if value in Task.sched_vals:
-                            new_task.cmd_sched \
+                            self.new_task.cmd_sched \
                                 = Task.sched_vals.index(value)
                         else:
                             raise(SchedParseExc
@@ -80,19 +117,18 @@ class ScheduleParser:
 
                     else:
                         # scheduler specific element
-                        if new_task.cmd_sched is None:
+                        if self.new_task.cmd_sched is None:
                             raise(SchedParseExc
                                   ('Scheduler property found before scheduler '
                                    f'was defined: {key}'))
                         else:
-                            if (key in new_task.props_list
-                                    [new_task.cmd_sched]):
-                                setattr(new_task, key, value)
+                            if (key in self.new_task.props_list
+                                    [self.new_task.cmd_sched]):
+                                setattr(self.new_task, key, value)
                             else:
                                 raise(SchedParseExc
                                       (f'Unknown scheduler property {key}'))
-
-            return task_list
+            return self.task_list
 
         except (OSError, KeyError) as err:
             raise err
