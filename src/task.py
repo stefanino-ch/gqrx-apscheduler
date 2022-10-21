@@ -1,3 +1,8 @@
+"""
+:Author: Stefan Feuz
+:License: General Public License GNU GPL 3.0
+"""
+import os
 import sys
 
 from communicator import Communicator
@@ -81,7 +86,7 @@ class Task:
         try:
             comm = Communicator(hostname, port)
         except Exception as err:
-            sys.stderr.write(f'Problems during connection setup: {err}')
+            sys.stderr.write(f'Problems during connection setup: {err} {os.linesep}')
             exit(1)
 
         if self.cmd_exec == Task.exec_vals.index('one_by_one'):

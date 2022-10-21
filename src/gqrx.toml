@@ -69,8 +69,8 @@
     execution="all"
     commands=["U DSP 1", "U IQRECORD 1"]
     sched_type= "cron"
-    hour= 17
-    minute= 55
+    hour= 18
+    minute= 02
 
 [[task]]
     execution="one_by_one"

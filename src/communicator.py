@@ -1,3 +1,8 @@
+"""
+:Author: Stefan Feuz
+:License: General Public License GNU GPL 3.0
+"""
+import os
 import sys
 import telnetlib
 
@@ -20,15 +25,18 @@ class Communicator:
 
     def __send(self, cmd):
         self.con.write(f'{cmd}\n'.encode('ascii'))
-        response = self.con.read_some().decode('ascii').strip()
+        raw = self.con.read_some()
+        response = raw.decode('ascii').strip()
         return response
 
     def send_cmd(self, cmd):
+
+        # TODO: make sure commands are not send in parallel
         resp = self.__send(cmd)
 
         now = datetime.now()
         dtstring = now.strftime("%Y-%m-%d %H:%M:%S")
-        sys.stdout.write(f'{dtstring} {cmd} {resp}')
+        sys.stdout.write(f'{dtstring} {cmd} {resp} {os.linesep}')
 
         if resp == 'RPRT 0':
             return True
