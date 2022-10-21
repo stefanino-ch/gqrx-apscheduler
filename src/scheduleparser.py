@@ -87,6 +87,7 @@ class ScheduleParser:
         Extracts all scheduler tasks from the schedule file.
         :return: List containing instances of task representing a single task
         """
+        task_list=[]
         try:
             schedule = self.__read_file()
             tlist = schedule["task"]
