@@ -11,15 +11,15 @@
     execution="all"
     commands=["U DSP 1", "U IQRECORD 1"]
     sched_type= "cron"
-    hour= 18
-    minute= 59
+    hour= 9
+    minute= 19
 
 [[task]]
     execution="all"
     commands=["U DSP 0", "U IQRECORD 0"]
     sched_type= "cron"
-    hour= 19
-    minute= 0
+    hour= 9
+    minute= 20
 
 [[task]]
     execution="one_by_one"

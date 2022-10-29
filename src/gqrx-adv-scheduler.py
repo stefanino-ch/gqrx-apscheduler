@@ -29,40 +29,27 @@ except ModuleNotFoundError:
         print('-> Try "pip install tomli" or')
         exit(0)
 
-# TODO: cleanup
-# from PyQt5.QtCore import QObject
-
-from task import Task
-
-
-# TODO: cleanup
-# class Singleton(type(QObject), type):
-#     """
-#     :class: Parent class used to build the individual singletons
-#             across the program.
-#     """
-#     def __init__(cls, name, bases, dict):  # @NoSelf @ReservedAssignment
-#         super().__init__(name, bases, dict)
-#         cls._instance = None
-#
-#     def __call__(cls, *args, **kwargs):  # @NoSelf
-#         if cls._instance is None:
-#             cls._instance = super().__call__(*args, **kwargs)
-#         return cls._instance
-
-
 sem = threading.Semaphore()
 
 
-class Communicator(object):
+class Singleton(type):
+    """
+    Helper class needed to get only one single Communicator.
+    If multiple Communicators are instantiated, you might run into communication
+    errors if multiple messages are sent during overlapping timeslots.
+    """
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class Communicator(metaclass=Singleton):
     """
     Handles all communication with gqrx
     """
-
-    def __new__(cls):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(Communicator, cls).__new__(cls)
-        return cls.instance
 
     def __init__(self, ip='127.0.0.1', port=7356):
         """
@@ -202,7 +189,7 @@ class ScheduleParser:
         self.task_list = []
         try:
             schedule = self.__read_file()
-            tlist = schedule["l_task"]
+            tlist = schedule["task"]
             for l_task in tlist:
                 self.new_task = Task()
                 self.task_list.append(self.new_task)
