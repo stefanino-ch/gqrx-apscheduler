@@ -37,6 +37,9 @@ class Singleton(type):
     Helper class needed to get only one single Communicator.
     If multiple Communicators are instantiated, you might run into communication
     errors if multiple messages are sent during overlapping timeslots.
+
+    Many thanks to:
+    https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
     """
     _instances = {}
 
