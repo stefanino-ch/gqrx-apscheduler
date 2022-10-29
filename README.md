@@ -2,6 +2,11 @@
 A python based application allowing to schedule commands to be sent to qgrx. 
 For more info about gqrx refer to https://gqrx.dk/
 
+## Installation
+All you need is the single file **gqrx-adv-scheduler.py**. 
+Copy this file to your computer. 
+Make sure you have python installed. 
+
 ## Usage
 
 ### Create the schedule file
@@ -27,8 +32,8 @@ demodulation will be switched off and the DSP is stopped.
 [initial-setup]
     commands=["M OFF", "U DSP 0"]
 ```
-
-
+The real essence of configuration is sitting in the **[[task]]** blocks. 
+Check the two files **qgrx.toml** and **test.toml** for examples and explanations. 
 
 ### Start the scheduler
 Make sure:
