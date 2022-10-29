@@ -1,4 +1,12 @@
 # gqrx.toml
+# A file showing valid configuration used for some testing tasks.
+
+########################################################
+# IMPORTANT
+# !!!DO NOT USE LEADING ZEROS!!!
+# WRONG : "minute= 02"
+# OK    : "minute= 2"
+########################################################
 
 [connection-settings]
     hostname = "localhost"

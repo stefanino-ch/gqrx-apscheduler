@@ -1,17 +1,23 @@
 # gqrx.toml
+# Explaining the possible configuration strings in detail
 
 # Valid date time formats
+# =======================
 # offset_date-time     = 2021-01-12 01:23:45+01:00
 # offset_date-time_utc = 2021-01-12 00:23:45Z
 # local_date-time      = 2021-01-12 01:23:45
 
-# date
-# ----
+# Tasks with sched_type= "date"
+# Will just run once at a given date/time
+# You have the follwing time setting possibilities
+# ================================================
 # run_date (datetime|str) – the date/time to run the job at
 # timezone (datetime.tzinfo|str) – time zone for run_date if it doesn’t have one already
 
-# interval
-# --------
+# Tasks with sched_type= "interval"
+# Will run in a given interval
+# You have the follwing time setting possibilities
+# ================================================
 # weeks (int) – number of weeks to wait
 # days (int) – number of days to wait
 # hours (int) – number of hours to wait
@@ -22,10 +28,12 @@
 # timezone (datetime.tzinfo|str) – time zone to use for the date/time calculations
 # jitter (int|None) – delay the job execution by jitter seconds at most
 
-# cron
-# ----
-# https://crontab.guru/
-#
+# Tasks with sched_type= "cron"
+# Are the ones with the most configuration possibilies, but take the time to
+# test what you cinfigure, not always happens what you expect.
+# To check the cron settings you can use e.g. https://crontab.guru/
+# You have the follwing time setting possibilities
+# ================================================
 # year (int|str) – 4-digit year
 # month (int|str) – month (1-12)
 # day (int|str) – day of month (1-31)
@@ -39,10 +47,25 @@
 # timezone (datetime.tzinfo|str) – time zone to use for the date/time calculations (defaults to scheduler timezone)
 # jitter (int|None) – delay the job execution by jitter seconds at most
 
+########################################################
+# IMPORTANT
+# !!!DO NOT USE LEADING ZEROS!!!
+# WRONG : "minute= 02"
+# OK    : "minute= 2"
+########################################################
+
+# Examples
+# =========
+
+# [connection-settings] is mandatory!
+# It defines where gqrx is listening. If you have gqrx installed on the same
+# computer you can go most probably with the values given below.
 [connection-settings]
     hostname = "localhost"
     port = 7356
 
+# [initial-setup] commands are sent once at the start of the scheduler.
+# Use this to assure the basic configuration of gqrx is ok.
 [initial-setup]
     commands=["M OFF", "U DSP 0"]
 
@@ -51,12 +74,20 @@
 #    commands=["cmd_1", "cmd_2", "cmd_x"]
 #    sched_type= "date" "interval" "cron"
 
+# Start the dsp and iqrecording on 2022-08-20 17:02:00
 #[[task]]
 #    execution="all"
-#    commands=["U DSP 1"]
+#    commands=["U DSP 1", "U IQRECORD 1"]
 #    sched_type= "date"
 #    run_date= 2022-08-20 17:02:00
 
+# Runs from 2022-08-20 17:03:00 until 2022-08-20 17:04:00
+# Executes the commands one after the other in 10 second intervals
+# xx:10 "U DSP 0"
+# xx:20 "U DSP 1"
+# xx:30 "U DSP 0"
+# xx:40 "U DSP 1"
+# ...
 #[[task]]
 #    execution="one_by_one"
 #    commands=["U DSP 0", "U DSP 1"]
@@ -65,24 +96,37 @@
 #    end_date= 2022-08-20 17:04:00
 #    seconds=10
 
+
+# The following series of 3 tasks will
+# iqrecord every day from 18:2 until 18:5
+# on alternating frequencies 90000000 and 100000000
+
+# Starts every day at 18:2
+# Exectutes all commands at the same time (start dsp and iqrecording)
 [[task]]
     execution="all"
     commands=["U DSP 1", "U IQRECORD 1"]
     sched_type= "cron"
     hour= 18
-    minute= 02
+    minute= 2
 
+# Starts at the time the scheduler ist startet
+# Executes the commands one after the other in 10 second intervals
+# xx:10 "F 90000000"
+# xx:20 "F 100000000"
+# xx:30 "F 90000000"
+# xx:40 "UF 100000000"
 [[task]]
     execution="one_by_one"
     commands=["F 90000000", "F 100000000"]
     sched_type= "cron"
-#    hour=
-#    minute=
     second= "*/10"
 
+# Starts every day at 18:5
+# Exectutes all commands at the same time (stop dsp and iqrecording)
 [[task]]
     execution="all"
     commands=["U IQRECORD 0", "U DSP 0"]
     sched_type= "cron"
-    hour= 17
-    minute= 56
+    hour= 18
+    minute= 5
