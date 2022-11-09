@@ -19,18 +19,18 @@
     execution="all"
     commands=["U DSP 1", "U IQRECORD 1"]
     sched_type= "cron"
-    hour= 9
-    minute= 19
+    hour= 15
+    minute= 55
 
 [[task]]
     execution="all"
     commands=["U DSP 0", "U IQRECORD 0"]
     sched_type= "cron"
-    hour= 9
-    minute= 20
+    hour= 15
+    minute= 56
 
 [[task]]
     execution="one_by_one"
-    commands=["F 50000000", "F 100000000"]
+    commands=["F 105800000", "F 101000000"]
     sched_type= "cron"
     second= "*/10"

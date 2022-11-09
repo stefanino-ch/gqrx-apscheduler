@@ -14,6 +14,7 @@ from datetime import datetime
 
 try:
     from apscheduler.schedulers.background import BackgroundScheduler
+    from apscheduler.events import EVENT_JOB_ERROR
 except ModuleNotFoundError:
     print('Python module apscheduler not found. Try "pip install apscheduler"')
     exit(0)
@@ -60,6 +61,7 @@ class Communicator(metaclass=Singleton):
         :param ip: IP address of the computer where gqrx is running
         :param port: Port on which gqrx is listening
         """
+        self.comm_err = False
         self.con = None
         self.__check_connection(ip, port)
 
@@ -95,11 +97,14 @@ class Communicator(metaclass=Singleton):
         """
         sem.acquire()
 
-        resp = self.__send(cmd)
-
-        now = datetime.now()
-        dtstring = now.strftime("%Y-%m-%d %H:%M:%S")
-        sys.stdout.write(f'{dtstring} {cmd} {resp} {os.linesep}')
+        try:
+            resp = self.__send(cmd)
+            now = datetime.now()
+            dtstring = now.strftime("%Y-%m-%d %H:%M:%S")
+            sys.stdout.write(f'{dtstring} {cmd} {resp} {os.linesep}')
+        except Exception as err:
+            sys.stderr.write(f'Comm: {err} {os.linesep}')
+            self.comm_err = True
 
         sem.release()
 
@@ -338,7 +343,6 @@ class Task:
             comm = Communicator(ip, port)
         except Exception as err:
             sys.stderr.write(f'Problems during connection setup: {err} {os.linesep}')
-            exit(1)
 
         if self.cmd_exec == Task.exec_vals.index('one_by_one'):
             comm.send_cmd(self.cmd_list[self.next_cmd])
@@ -427,11 +431,10 @@ def main():
     # Start the scheduler
     sched.start()
 
-    try:
-        while True:
-            time.sleep(1)
-    except (KeyboardInterrupt, SystemExit):
-        sched.shutdown()
+    while True and not comm.comm_err:
+        time.sleep(1)
+
+    sched.shutdown()
 
 
 if __name__ == '__main__':
