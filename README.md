@@ -1,9 +1,9 @@
-# gqrx-adv-scheduler
+# gqrx-apscheduler
 A python based application allowing to schedule commands to be sent to qgrx. 
 For more info about gqrx refer to https://gqrx.dk/
 
 ## Installation
-All you need is the single file **gqrx-adv-scheduler.py**. 
+All you need is the single file **gqrx-apscheduler.py**. 
 Copy this file to your computer. 
 Make sure you have python installed. 
 
@@ -13,7 +13,7 @@ Make sure you have python installed.
 Together with the source files you will find a template called 
 gqrx.toml which should simplify your first trials. 
 
-A valid shedule file contains at least the following three configuration blocks
+A valid schedule file contains at least the following three configuration blocks
 - **[connection-settings]**
 - **[initial-setup]**
 - as many you need of **[[task]]** blocks
