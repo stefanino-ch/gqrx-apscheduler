@@ -9,6 +9,7 @@ import sys
 import time
 import telnetlib
 import threading
+import tzlocal
 
 from datetime import datetime
 
@@ -405,7 +406,7 @@ def main():
     comm.send_cmd_list(setup_cmd)
 
     # Setup scheduler
-    sched = BackgroundScheduler(daemon=True)
+    sched = BackgroundScheduler(daemon=True, timezone=str(tzlocal.get_localzone()))
 
     # Establish scheduler based on tasklist
     for task in task_list:
