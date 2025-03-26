@@ -1,0 +1,367 @@
+# gqrx.toml
+# Explaining the possible configuration strings in detail
+
+# Valid date time formats
+# =======================
+# offset_date-time     = 2021-01-12 01:23:45+01:00
+# offset_date-time_utc = 2021-01-12 00:23:45Z
+# local_date-time      = 2021-01-12 01:23:45
+
+# Tasks with sched_type= "date"
+# Will just run once at a given date/time
+# You have the follwing time setting possibilities
+# ================================================
+# run_date (datetime|str) – the date/time to run the job at
+# timezone (datetime.tzinfo|str) – time zone for run_date if it doesn’t have one already
+
+# Tasks with sched_type= "interval"
+# Will run in a given interval
+# You have the follwing time setting possibilities
+# ================================================
+# weeks (int) – number of weeks to wait
+# days (int) – number of days to wait
+# hours (int) – number of hours to wait
+# minutes (int) – number of minutes to wait
+# seconds (int) – number of seconds to wait
+# start_date (datetime|str) – starting point for the interval calculation
+# end_date (datetime|str) – latest possible date/time to trigger on
+# timezone (datetime.tzinfo|str) – time zone to use for the date/time calculations
+# jitter (int|None) – delay the job execution by jitter seconds at most
+
+# Tasks with sched_type= "cron"
+# Are the ones with the most configuration possibilies, but take the time to
+# test what you cinfigure, not always happens what you expect.
+# To check the cron settings you can use e.g. https://crontab.guru/
+# You have the follwing time setting possibilities
+# ================================================
+# year (int|str) – 4-digit year
+# month (int|str) – month (1-12)
+# day (int|str) – day of month (1-31)
+# week (int|str) – ISO week (1-53)
+# day_of_week (int|str) – number or name of weekday (0-6 or mon,tue,wed,thu,fri,sat,sun)
+# hour (int|str) – hour (0-23)
+# minute (int|str) – minute (0-59)
+# second (int|str) – second (0-59)
+# start_date (datetime|str) – earliest possible date/time to trigger on (inclusive)
+# end_date (datetime|str) – latest possible date/time to trigger on (inclusive)
+# timezone (datetime.tzinfo|str) – time zone to use for the date/time calculations (defaults to scheduler timezone)
+# jitter (int|None) – delay the job execution by jitter seconds at most
+
+########################################################
+# IMPORTANT
+# !!!DO NOT USE LEADING ZEROS!!!
+# WRONG : "minute= 02"
+# OK    : "minute= 2"
+########################################################
+
+# Examples
+# =========
+
+# [connection-settings] is mandatory!
+# It defines where gqrx is listening. If you have gqrx installed on the same
+# computer you can go most probably with the values given below.
+#[connection-settings]
+#    hostname = "localhost"
+#    port = 7356
+
+# [initial-setup] commands are sent once at the start of the scheduler.
+# Use this to assure the basic configuration of gqrx is ok.
+#[initial-setup]
+#    commands=["M OFF", "U IQRECORD 0", "U DSP 0", "F 70000"]
+
+
+#[[task]]
+#    execution= "all" | "one_by_one"
+#    commands=["cmd_1", "cmd_2", "cmd_x"]
+#    sched_type= "date" "interval" "cron"
+
+# Start the dsp and iqrecording on 2022-08-20 17:02:00
+#[[task]]
+#    execution="all"
+#    commands=["U DSP 1", "U IQRECORD 1"]
+#    sched_type= "date"
+#    run_date= 2022-08-20 17:02:00
+
+# Runs from 2022-08-20 17:03:00 until 2022-08-20 17:04:00
+# Executes the commands one after the other in 10 second intervals
+# xx:10 "U DSP 0"
+# xx:20 "U DSP 1"
+# xx:30 "U DSP 0"
+# xx:40 "U DSP 1"
+# ...
+#[[task]]
+#    execution="one_by_one"
+#    commands=["U DSP 0", "U DSP 1"]
+#    sched_type= "interval"
+#    start_date= 2022-08-20 17:03:00
+#    end_date= 2022-08-20 17:04:00
+#    seconds=10
+
+
+# The following series of 3 tasks will
+# iqrecord every day from 18:2 until 18:5
+# on alternating frequencies 90000000 and 100000000
+
+# Starts every day at 18:2
+# Exectutes all commands at the same time (start dsp and iqrecording)
+#[[task]]
+#    execution="all"
+#    commands=["U DSP 1", "U IQRECORD 1"]
+#    sched_type= "cron"
+#    hour= 18
+#    minute= 2
+
+# Starts at the time the scheduler ist startet
+# Executes the commands one after the other in 10 second intervals
+# xx:10 "F 90000000"
+# xx:20 "F 100000000"
+# xx:30 "F 90000000"
+# xx:40 "UF 100000000"
+#[[task]]
+#    execution="one_by_one"
+#    commands=["F 90000000", "F 100000000"]
+#    sched_type= "cron"
+#    second= "*/10"
+
+# Starts every day at 18:5
+# Exectutes all commands at the same time (stop dsp and iqrecording)
+#[[task]]
+#    execution="all"
+#    commands=["U IQRECORD 0", "U DSP 0"]
+#    sched_type= "cron"
+#    hour= 18
+#    minute= 5
+
+# SETUP
+# =====
+
+# [connection-settings] is mandatory!
+# It defines where gqrx is listening. If you have gqrx installed on the same
+# computer you can go most probably with the values given below.
+[connection-settings]
+    hostname = "localhost"
+    port = 7356
+
+# [initial-setup] commands are sent once at the start of the scheduler.
+# Use this to assure the basic configuration of gqrx is ok.
+[initial-setup]
+    commands=["M OFF", "U IQRECORD 0", "U DSP 0", "F 4000000"]
+
+# Immer um O:00 wird der freie Platz im Verzeichnis kontrolliert, darum starten wir ein wenig später
+
+####### Start recording at *:00:15
+# Disk size check runs at every full hour
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 0
+    second= 15
+
+# Stop recording at *:04:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 4
+    second= 45
+
+####### Start recording at *:05:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 5
+    second= 0
+
+# Stop recording at *:09:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 9
+    second= 45
+
+####### Start recording at *:10:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 10
+    second= 0
+
+# Stop recording at *:14:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 14
+    second= 45
+
+####### Start recording at *:15:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 15
+    second= 0
+
+# Stop recording at *:19:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 19
+    second= 45
+
+####### Start recording at *:20:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 20
+    second= 0
+
+# Stop recording at *:24:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 24
+    second= 45
+
+####### Start recording at *:25:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 25
+    second= 0
+
+# Stop recording at *:29:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 29
+    second= 45
+
+####### Start recording at *:30:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 30
+    second= 0
+
+# Stop recording at *:34:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+     hour = "17, 18, 19, 20, 21"
+    minute= 34
+    second= 45
+
+####### Start recording at *:35:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 35
+    second= 0
+
+# Stop recording at *:39:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 39
+    second= 45
+
+###### Start recording at *:40:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 40
+    second= 0
+
+# Stop recording at *:44:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 44
+    second= 45
+
+####### Start recording at *:45:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 45
+    second= 0
+
+# Stop recording at *:49:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 49
+    second= 45
+
+####### Start recording at *:50:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 50
+    second= 0
+
+# Stop recording at *:54:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 54
+    second= 45
+
+####### Start recording at *:55:00
+[[task]]
+    execution="all"
+    commands=["U DSP 1", "U IQRECORD 1"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 55
+    second= 0
+
+# Stop recording and DSP at *:59:45
+[[task]]
+    execution="all"
+    commands=["U IQRECORD 0", "U DSP 0"]
+    sched_type= "cron"
+    hour = "17, 18, 19, 20, 21"
+    minute= 59
+    second= 45
