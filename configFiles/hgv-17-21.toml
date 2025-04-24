@@ -145,7 +145,7 @@
 # [initial-setup] commands are sent once at the start of the scheduler.
 # Use this to assure the basic configuration of gqrx is ok.
 [initial-setup]
-    commands=["M OFF", "U IQRECORD 0", "U DSP 0", "F 4000000"]
+    commands=["M OFF", "U IQRECORD 0", "U DSP 0", "F 3697000"]
 
 # Immer um O:00 wird der freie Platz im Verzeichnis kontrolliert, darum starten wir ein wenig später
 
