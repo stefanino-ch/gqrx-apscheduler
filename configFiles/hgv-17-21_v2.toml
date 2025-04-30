@@ -246,15 +246,15 @@
     minute= 55
     second= 0
 
-# Stop recording at *:04:30
-# Disk check at *:04:40
+# Stop recording at *:03:45
+# Disk check at *:04:00
 [[task]]
     execution="all"
     commands=["U IQRECORD 0"]
     sched_type= "cron"
     hour = "17, 18, 19, 20, 21"
-    minute= 4
-    second= 30
+    minute= 3
+    second= 45
 
 # *************************
 # Stop DSP and recording at 22:05:00
